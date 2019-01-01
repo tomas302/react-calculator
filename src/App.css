@@ -21,6 +21,7 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   grid-template-areas:
+  "formula formula formula formula"
   "display display display display"
   "clear clear divide multiply"
   "seven eight nine subtract"
@@ -34,7 +35,7 @@ body {
   background-color: black;
 }
 
-a {
+#app > div {
   padding: 25px;
   display: flex;
   justify-content: center;
@@ -61,10 +62,22 @@ a {
 #decimal { grid-area: decimal; }
 #clear { grid-area: clear; }
 #display {
+  text-align: right;
   grid-area: display;
   background-color: black;
   color: white;
-  border: none;
+  border: none !important;
+  padding-top: 14px !important;
+  padding-bottom: 10px !important;
+}
+#formula {
+  grid-area: formula;
+  background-color: black;
+  color: orange;
+  border: none !important;
+  padding-top: 7px !important;
+  padding-bottom: 0px !important;
+  height: 24px;
 }
 
 #zero { grid-area: zero; }
