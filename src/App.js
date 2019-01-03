@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import './App.css';
 
+const MAX_LENGTH = 36;
 const NOT_CONCATENABLE = ["+", "-", "x", "/", "."];
+const OPERATORS = ["+", "-", "x", "/"];
 
 const ADD = -1;
 const SUBTRACT = -2;
@@ -24,11 +26,13 @@ class App extends Component {
     super(props);
     this.state = {
       display: '0',
-      formula: ''
+      formula: '',
+      resultCalculated: false
     };
 
     this.calculate = this.calculate.bind(this);
     this.canConcatOperator = this.canConcatOperator.bind(this);
+    this.canConcatDecimal = this.canConcatDecimal.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.getInitialFormula = this.getInitialFormula.bind(this);
   }
@@ -39,51 +43,99 @@ class App extends Component {
     if (!this.canConcatOperator()) {
       formula = formula.slice(0, -1);
     }
-    let result = 0;
-    // operation logic
-    
-
+    let result = eval(formula.replace("x", "*"));
     formula += "=" + result;
     display = result;
+    this.setState({ resultCalculated: true });
     // array has this structure -> [newDisplay, newFormula]
     return [display, formula];
   }
 
   canConcatOperator() {
     let lastChar = this.state.display[this.state.display.length - 1];
-    let canConcatenate = NOT_CONCATENABLE.filter(symbol => lastChar === symbol).length === 0;
+    let canConcatenate = !OPERATORS.includes(lastChar);
     return canConcatenate;
   }
+
+  // returns true if can add decimal point and if it needs to add a zero before it
+  canConcatDecimal() {
+    let lastOperator = "";
+    let addZero = false;
+    let formula = this.state.formula;
+    console.log(formula.length);
+    for (var i = formula.length - 1; i >= 0; i--) {
+
+    }
+    if (lastOperator === ".") {
+      return [false, addZero];
+    }
+    return [true, addZero];
+  }
+
 
   handleClick(button) {
     let newDisplay = (this.state.display === "0" && isANumber(button)) ? "" : this.state.display;
     let newFormula = this.getInitialFormula(button);
+    if (this.state.resultCalculated && button !== EQUALS) {
+      this.setState({ resultCalculated: false });
+      if (button >= 0) {
+        newDisplay = "";
+        newFormula = "";
+      } else {
+        let lastResult = newFormula.split("=")[1];
+        newDisplay = lastResult;
+        newFormula = lastResult;
+      }
+    }
     switch(button) {
       case(ADD):
+        newDisplay = "+";
         if (this.canConcatOperator()) {
-          newDisplay = "+";
           newFormula += "+";
+        } else {
+          newFormula = newFormula.slice(0, -1) + "+";
         }
         break;
       case(SUBTRACT):
+        newDisplay = "-";
         if (this.canConcatOperator()) {
-          newDisplay = "-";
           newFormula += "-";
+        } else {
+          newFormula = newFormula.slice(0, -1) + "-";
         }
         break;
       case(MULTIPLY):
+        newDisplay = "x";
         if (this.canConcatOperator()) {
-          newDisplay = "x";
           newFormula += "x";
+        } else {
+          newFormula = newFormula.slice(0, -1) + "x";
         }
         break;
       case(DIVIDE):
+        newDisplay = "/";
         if (this.canConcatOperator()) {
-          newDisplay = "/";
           newFormula += "/";
+        } else {
+          newFormula = newFormula.slice(0, -1) + "/";
+        }
+        break;
+      case(DECIMAL):
+        let canConcat = this.canConcatDecimal();
+        if (canConcat[0]) {
+          let decimalToAdd = "";
+          if (canConcat[1]) {
+            decimalToAdd = "0.";
+            newDisplay = "";
+          } else {
+            decimalToAdd = ".";
+          }
+          newDisplay += decimalToAdd;
+          newFormula += decimalToAdd;
         }
         break;
       case(EQUALS):
+        if (this.state.resultCalculated) break; 
         let result = this.calculate();
         newDisplay = result[0];
         newFormula = result[1];
@@ -93,7 +145,7 @@ class App extends Component {
         newFormula = "";
         break;
       default:
-        this.canConcatOperator() ? newDisplay += button : newDisplay = button;
+        this.canConcatOperator() ? newDisplay += button.toString() : newDisplay = button;
         newFormula += button;
     }
     this.setState({ display: newDisplay, formula: newFormula });
@@ -107,7 +159,7 @@ class App extends Component {
         return "0";
       }
     } else {
-      return this.state.formula;;
+      return this.state.formula;
     }
   }
 
