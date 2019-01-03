@@ -1,7 +1,8 @@
+/* eslint no-eval: 0 */
 import React, { Component } from 'react';
 import './App.css';
 
-const MAX_LENGTH = 36;
+//const MAX_LENGTH = 36;
 const NOT_CONCATENABLE = ["+", "-", "x", "/", "."];
 const OPERATORS = ["+", "-", "x", "/"];
 
@@ -60,11 +61,22 @@ class App extends Component {
   // returns true if can add decimal point and if it needs to add a zero before it
   canConcatDecimal() {
     let lastOperator = "";
-    let addZero = false;
+    let addZero = true;
     let formula = this.state.formula;
     console.log(formula.length);
     for (var i = formula.length - 1; i >= 0; i--) {
-
+      if (NOT_CONCATENABLE.includes(formula[i])) {
+        if (formula[i] === ".") {
+          lastOperator = ".";
+          break;
+        }
+        break;
+      } else {
+        addZero = false;
+      }
+    }
+    if (formula.length === 0) {
+      addZero = false;
     }
     if (lastOperator === ".") {
       return [false, addZero];
